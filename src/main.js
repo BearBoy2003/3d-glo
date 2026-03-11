@@ -1,5 +1,2 @@
-import oneModule from './modules/one.js'
-import twoModule from './modules/two.js'
-
-oneModule()
-twoModule()
+import './styles/bootstrap.min.css'
+import './styles/style.min.css'
