@@ -1,8 +1,6 @@
 const modal = () => {
 	const popup = document.querySelector('.popup')
 	const popupContent = document.querySelector('.popup-content')
-	const closeBtn = document.querySelector('.popup-close')
-	const popupButtons = document.querySelectorAll('.popup-btn')
 
 	let isOpen = false
 	let popupAnimation
@@ -37,11 +35,6 @@ const modal = () => {
 
 		if (open) {
 			popup.style.display = 'block'
-			popup.style.pointerEvents = 'auto'
-			popupContent.style.left = '50%'
-			popupContent.style.top = '50%'
-			popupContent.style.maxWidth = 'calc(100% - 2rem)'
-			document.body.style.overflow = 'hidden'
 		}
 
 		popupAnimation?.cancel()
@@ -52,16 +45,23 @@ const modal = () => {
 		contentAnimation.onfinish = () => {
 			if (!open) {
 				popup.style.display = 'none'
-				popup.style.pointerEvents = 'none'
-				document.body.style.overflow = ''
 			}
 		}
 
 		isOpen = open
 	}
 
-	popupButtons.forEach(button => button.addEventListener('click', () => toggleModal(true)))
-	closeBtn.addEventListener('click', () => toggleModal(false))
+	document.addEventListener('click', event => {
+		if (event.target.closest('.popup-btn')) {
+			toggleModal(true)
+		}
+	})
+
+	popup.addEventListener('click', event => {
+		if (!event.target.closest('.popup-content') || event.target.closest('.popup-close')) {
+			toggleModal(false)
+		}
+	})
 }
 
 export default modal

@@ -1,18 +1,6 @@
 const menu = () => {
-	const menuBtn = document.querySelector('.menu')
-	const menu = document.querySelector('menu')
-	const closeBtn = menu.querySelector('.close-btn')
-	const menuItems = menu.querySelectorAll('ul>li>a')
-	const scrollBtn = document.querySelector('main > a[href^="#"]')
-
-	const toggleMenu = () => {
-		menu.classList.toggle('active-menu')
-	}
-
-	const closeMenu = () => {
-		menu.classList.remove('active-menu')
-	}
-
+	const menuElement = document.querySelector('menu')
+	
 	const smoothScroll = target => {
 		const startPosition = window.pageYOffset
 		const targetPosition = target.getBoundingClientRect().top + window.pageYOffset
@@ -41,22 +29,32 @@ const menu = () => {
 		requestAnimationFrame(animateScroll)
 	}
 
-	menuBtn.addEventListener('click', toggleMenu)
-	closeBtn.addEventListener('click', event => {
-		event.preventDefault()
-		closeMenu()
-	})
+	const toggleMenu = event => {
+		const burgerBtn = event.target.closest('header .menu')
+		const closeBtn = event.target.closest('menu .close-btn')
+		const menuLink = event.target.closest('menu ul a[href^="#"]')
+		const scrollLink = event.target.closest('main > a[href^="#"]')
+		const clickedInsideMenu = event.target.closest('menu')
+		const isMenuOpen = menuElement.classList.contains('active-menu')
 
-	menuItems.forEach(item => item.addEventListener('click', event => {
-		event.preventDefault()
-		closeMenu()
-		smoothScroll(document.querySelector(item.getAttribute('href')))
-	}))
+		if (burgerBtn) {
+			menuElement.classList.toggle('active-menu')
+		} else if (closeBtn) {
+			event.preventDefault()
+			menuElement.classList.remove('active-menu')
+		} else if (menuLink) {
+			event.preventDefault()
+			menuElement.classList.remove('active-menu')
+			smoothScroll(document.querySelector(menuLink.getAttribute('href')))
+		} else if (scrollLink) {
+			event.preventDefault()
+			smoothScroll(document.querySelector(scrollLink.getAttribute('href')))
+		} else if (isMenuOpen && !clickedInsideMenu) {
+			menuElement.classList.remove('active-menu')
+		}
+	}
 
-	scrollBtn.addEventListener('click', event => {
-		event.preventDefault()
-		smoothScroll(document.querySelector(scrollBtn.getAttribute('href')))
-	})
+	document.addEventListener('click', toggleMenu)
 }
 
 export default menu
