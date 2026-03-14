@@ -1,36 +1,67 @@
 const calc = () => {
-	const calcType = document.querySelector('.calc-type')
-	const calcSquare = document.querySelector('.calc-square')
-	const calcCount = document.querySelector('.calc-count')
-	const calcDay = document.querySelector('.calc-day')
+	const calcBlock = document.querySelector('.calc-block')
+	const calcType = calcBlock.querySelector('.calc-type')
+	const calcSquare = calcBlock.querySelector('.calc-square')
+	const calcCount = calcBlock.querySelector('.calc-count')
+	const calcDay = calcBlock.querySelector('.calc-day')
 	const total = document.getElementById('total')
-	const numberInputs = [calcSquare, calcCount, calcDay]
-	
-	const getValue = input => Number(input.value)
+	const BASE_PRICE = 100
+	let currentTotal = +total.textContent || 0
+	let frameId = 0
 
-	const updateTotal = () => {
-		const typeValue = getValue(calcType)
-		const squareValue = getValue(calcSquare)
-		const countValue = getValue(calcCount) || 1
-		const dayValue = getValue(calcDay) || 10
+	const animateTotal = nextValue => {
+		cancelAnimationFrame(frameId)
 
-		if (!typeValue || !squareValue) {
-			total.textContent = '0'
-			return
+		const startValue = currentTotal
+		const startTime = performance.now()
+
+		const updateValue = currentTime => {
+			const progress = Math.min((currentTime - startTime) / 300, 1)
+			currentTotal = Math.round(startValue + (nextValue - startValue) * progress)
+			total.textContent = currentTotal
+
+			if (progress < 1) {
+				frameId = requestAnimationFrame(updateValue)
+			}
 		}
 
-		const speedMultiplier = dayValue < 5 ? 2 : dayValue < 10 ? 1.5 : 1
-		total.textContent = String(Math.round(typeValue * squareValue * 100 * countValue * speedMultiplier))
+		frameId = requestAnimationFrame(updateValue)
 	}
 
-	numberInputs.forEach(input => {
-		input.inputMode = 'numeric'
-		input.addEventListener('input', () => {
-			input.value = input.value.replace(/\D/g, '')
-			updateTotal()
-		})
+	const updateTotal = () => {
+		const calcTypeValue = +calcType.value
+		const calcSquareValue = +calcSquare.value
+		const calcCountValue = +calcCount.value
+		const calcDayValue = +calcDay.value
+
+		let totalValue = 0
+		let roomsMultiplier = 1
+		let daysMultiplier = 1
+
+		if (calcCountValue > 1) {
+			roomsMultiplier += calcCountValue / 10
+		}
+
+		if (calcDay.value && calcDayValue < 5) {
+			daysMultiplier = 2
+		} else if (calcDay.value && calcDayValue < 10) {
+			daysMultiplier = 1.5
+		}
+
+		if (calcTypeValue && calcSquareValue) {
+			totalValue = BASE_PRICE * calcTypeValue * calcSquareValue * roomsMultiplier * daysMultiplier
+		}
+
+		animateTotal(Math.round(totalValue))
+	}
+
+	calcBlock.addEventListener('input', event => {
+		if (event.target !== calcType) {
+			event.target.value = event.target.value.replace(/\D/g, '')
+		}
+
+		updateTotal()
 	})
-	calcType.addEventListener('change', updateTotal)
 }
 
 export default calc

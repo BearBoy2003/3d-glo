@@ -8,7 +8,7 @@ import slider from './modules/slider.js'
 import './styles/bootstrap.min.css'
 import './styles/style.min.css'
 
-timer(Date.now() + 86400000)
+timer()
 menu()
 modal()
 calc()
