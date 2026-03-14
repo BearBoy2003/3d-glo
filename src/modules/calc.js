@@ -1,3 +1,5 @@
+import { animate } from '../utils/animate.js'
+
 const calc = () => {
 	const calcBlock = document.querySelector('.calc-block')
 	const calcType = calcBlock.querySelector('.calc-type')
@@ -7,25 +9,23 @@ const calc = () => {
 	const total = document.getElementById('total')
 	const BASE_PRICE = 100
 	let currentTotal = +total.textContent || 0
-	let frameId = 0
+	let stopAnimation = () => {}
 
 	const animateTotal = nextValue => {
-		cancelAnimationFrame(frameId)
-
-		const startValue = currentTotal
-		const startTime = performance.now()
-
-		const updateValue = currentTime => {
-			const progress = Math.min((currentTime - startTime) / 300, 1)
-			currentTotal = Math.round(startValue + (nextValue - startValue) * progress)
-			total.textContent = currentTotal
-
-			if (progress < 1) {
-				frameId = requestAnimationFrame(updateValue)
-			}
+		if (nextValue === currentTotal) {
+			return
 		}
 
-		frameId = requestAnimationFrame(updateValue)
+		const startValue = currentTotal
+
+		stopAnimation()
+		stopAnimation = animate({
+			duration: 300,
+			draw(progress) {
+				currentTotal = Math.round(startValue + (nextValue - startValue) * progress)
+				total.textContent = currentTotal
+			},
+		})
 	}
 
 	const updateTotal = () => {

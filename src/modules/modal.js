@@ -1,31 +1,17 @@
+import { animate } from '../utils/animate.js'
+
 const modal = () => {
 	const popup = document.querySelector('.popup')
 	const popupContent = document.querySelector('.popup-content')
 
 	let isOpen = false
-	let popupAnimation
-	let contentAnimation
+	let stopAnimation = () => {}
 
-	const popupFrames = {
-		open: [{ opacity: 0 }, { opacity: 1 }],
-		close: [{ opacity: 1 }, { opacity: 0 }],
-	}
-
-	const contentFrames = {
-		open: [
-			{ opacity: 0, transform: 'translate(-50%, calc(-50% + 20px)) scale(0.9)' },
-			{ opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
-		],
-		close: [
-			{ opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
-			{ opacity: 0, transform: 'translate(-50%, calc(-50% + 20px)) scale(0.9)' },
-		],
-	}
-
-	const options = {
-		duration: 400,
-		easing: 'ease-out',
-		fill: 'forwards',
+	const easeOut = timeFraction => 1 - (1 - timeFraction) ** 3
+	const render = progress => {
+		popup.style.opacity = progress
+		popupContent.style.opacity = progress
+		popupContent.style.transform = `translate(-50%, calc(-50% + ${20 * (1 - progress)}px)) scale(${0.9 + progress * 0.1})`
 	}
 
 	const toggleModal = open => {
@@ -37,16 +23,24 @@ const modal = () => {
 			popup.style.display = 'block'
 		}
 
-		popupAnimation?.cancel()
-		contentAnimation?.cancel()
+		stopAnimation()
 
-		popupAnimation = popup.animate(popupFrames[open ? 'open' : 'close'], options)
-		contentAnimation = popupContent.animate(contentFrames[open ? 'open' : 'close'], options)
-		contentAnimation.onfinish = () => {
-			if (!open) {
-				popup.style.display = 'none'
-			}
-		}
+		const startProgress = open ? 0 : 1
+		const endProgress = open ? 1 : 0
+		render(startProgress)
+
+		stopAnimation = animate({
+			duration: 400,
+			timing: easeOut,
+			draw(progress) {
+				render(startProgress + (endProgress - startProgress) * progress)
+			},
+			complete() {
+				if (!open) {
+					popup.style.display = 'none'
+				}
+			},
+		})
 
 		isOpen = open
 	}
